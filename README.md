@@ -8,9 +8,9 @@ PHP 5.4 or higher
 
 # Installation
 
-1) Copy the **api** folder in your application
-2) Require the **api/autoload.php** file
-3) Call the api classes by using the namespace **SlimPay** (e.g. **new SlimPay\Client(...)**)
+1. Copy the **api** folder in your application
+2. Require the **api/autoload.php** file
+3. Call the api classes by using the namespace **SlimPay** (e.g. **new SlimPay\Client(...)**)
 
 # Example
 
