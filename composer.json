@@ -1,0 +1,29 @@
+{
+    "name": "slimpay/hapiclient",
+    "description": "An HTTP Client using HAL as the format for resources.",
+    "keywords": ["http", "hal", "rest", "client", "HTTP client", "HAL client", "hapi", "hateoas"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Youssef BEN OTHMAN",
+            "email": "youssef@slimpay.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "guzzlehttp/guzzle": "~5.3"
+    },
+	"require-dev": {
+        "phpunit/phpunit": "4.8.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "HapiClient\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HapiClient\\Tests\\": "tests/"
+        }
+    }
+}

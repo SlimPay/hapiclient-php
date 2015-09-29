@@ -1,6 +1,6 @@
-# client-api-rest-php
+# HAPI Client
 
-The SlimPay REST HAPI client for PHP
+An HTTP Client implementing the [HAL specification](https://tools.ietf.org/html/draft-kelly-json-hal-07).
 
 # Requirements
 
@@ -8,10 +8,13 @@ PHP 5.4 or higher
 
 # Installation
 
-1. Copy the **api** folder in your application
-2. Require the **api/autoload.php** file
-3. Call the api classes by using the namespace **SlimPay** (e.g. **new SlimPay\Client(...)**)
+Using composer:
+```php
+"require":{
+	 "slimpay/hapiclient":"1.0.*"
+}
+```
 
-# Example
+# Use
 
 Examples and full working snippets are available in the [HAPI Crawler](http://www.slimpay.net/rest-hapi-crawler/).
