@@ -8,12 +8,14 @@ PHP 5.4 or higher
 
 # Installation
 
-Using composer:
-```php
+Using [Composer](https://getcomposer.org/):
+```js
 "require":{
 	 "slimpay/hapiclient":"1.0.*"
 }
 ```
+
+If you are not familiar with Composer, you can download a pre-built [release](https://github.com/SlimPay/hapiclient-php/releases) with the dependencies.
 
 # Use
 
