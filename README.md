@@ -19,4 +19,4 @@ If you are not familiar with Composer, you can download a pre-built [release](ht
 
 # Use
 
-Examples and full working snippets are available in the [HAPI Crawler](http://www.slimpay.net/rest-hapi-crawler/).
+Examples and full working snippets are available in our [HAPI Browser](https://dev.slimpay.com/hapi/browser).
