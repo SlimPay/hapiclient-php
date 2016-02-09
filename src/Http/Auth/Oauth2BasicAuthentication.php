@@ -142,7 +142,10 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
         ]);
         
         $basic = base64_encode($this->userid . ':' . $this->password);
-        $authorizationHeader = [ 'Authorization' => 'Basic ' . $basic ];
+        $authorizationHeader = [
+            'Accept' => 'application/json',
+            'Authorization' => 'Basic ' . $basic
+        ];
         
         $request = new Http\Request(
             $this->tokenEndPointUrl,
