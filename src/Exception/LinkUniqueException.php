@@ -6,4 +6,6 @@ namespace HapiClient\Exception;
  * (rel) with the {@link Resource#getLinks(Rel)}
  * method but the value is a unique Link.
  */
-class LinkUniqueException extends \Exception { }
+class LinkUniqueException extends \Exception
+{
+}

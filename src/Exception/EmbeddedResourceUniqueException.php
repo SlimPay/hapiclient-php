@@ -6,4 +6,6 @@ namespace HapiClient\Exception;
  * (rel) with the {@link Resource#getEmbeddedResources(Rel)}
  * method but the value is a unique embedded Resource.
  */
-class EmbeddedResourceUniqueException extends \Exception { }
+class EmbeddedResourceUniqueException extends \Exception
+{
+}

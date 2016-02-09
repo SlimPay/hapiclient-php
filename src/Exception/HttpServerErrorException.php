@@ -1,4 +1,6 @@
 <?php
 namespace HapiClient\Exception;
 
-class HttpServerErrorException extends HttpException {}
+class HttpServerErrorException extends HttpException
+{
+}

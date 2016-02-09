@@ -1,4 +1,6 @@
 <?php
 namespace HapiClient\Exception;
 
-class HttpRedirectionException extends HttpException {}
+class HttpRedirectionException extends HttpException
+{
+}

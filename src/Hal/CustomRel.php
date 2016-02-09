@@ -9,39 +9,46 @@ namespace HapiClient\Hal;
  * @see https://tools.ietf.org/html/draft-kelly-json-hal-07#section-8.2
  * @see https://tools.ietf.org/html/rfc5988#section-4
  */
-final class CustomRel {
-	private $name;
-	
-	/**
-	 * An Extension Relation Type SHOULD be a URI or a name
-	 * using the CURIE syntax (prefix:reference).
-	 * Any name as a string is accepted too.
-	 * @param $name	string	The relation name.
-	 */
-	public function __construct($name) {
-		$name = trim($name);
-		if (!$name)
-			throw new \InvalidArgumentException("The name can't be empty");
-		
-		$this->name = $name;
-	}
-	
-	/**
-	 * @return	string	The relation name.
-	 */
-	public function getName() {
-		return $this->name;
-	}
-	
-	/**
-	 * The magic setter is overridden to insure immutability.
-	 */
-    final public function __set($name, $value) { }
+final class CustomRel
+{
+    private $name;
+    
+    /**
+     * An Extension Relation Type SHOULD be a URI or a name
+     * using the CURIE syntax (prefix:reference).
+     * Any name as a string is accepted too.
+     * @param $name	string	The relation name.
+     */
+    public function __construct($name)
+    {
+        $name = trim($name);
+        if (!$name) {
+            throw new \InvalidArgumentException("The name can't be empty");
+        }
+        
+        $this->name = $name;
+    }
+    
+    /**
+     * @return	string	The relation name.
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+    
+    /**
+     * The magic setter is overridden to insure immutability.
+     */
+    final public function __set($name, $value)
+    {
+    }
 
-	/**
-	 * @return	string	The relation name.
-	 */
-	public function __toString() {
-		return $this->name;
-	}
+    /**
+     * @return	string	The relation name.
+     */
+    public function __toString()
+    {
+        return $this->name;
+    }
 }
