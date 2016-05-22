@@ -2,11 +2,11 @@
 
 An HTTP Client implementing the [HAL specification](https://tools.ietf.org/html/draft-kelly-json-hal-07).
 
-# Requirements
+## Requirements
 
 PHP 5.4 or higher
 
-# Installation
+## Installation
 
 Using [Composer](https://getcomposer.org/):
 ```js
@@ -17,6 +17,6 @@ Using [Composer](https://getcomposer.org/):
 
 If you are not familiar with Composer, you can download a pre-built [release](https://github.com/SlimPay/hapiclient-php/releases) with the dependencies.
 
-# Use
+## Use
 
-Examples and full working snippets are available in the [HAPI Crawler](http://www.slimpay.net/rest-hapi-crawler/).
+Examples and full working snippets are available in the [HAPI Browser](https://dev.slimpay.com/hapi/browser).
