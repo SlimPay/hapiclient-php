@@ -2,7 +2,6 @@
 namespace HapiClient\Http\Auth;
 
 use HapiClient\Http;
-use \GuzzleHttp\Message\RequestInterface;
 
 /**
  * The <a href="https://tools.ietf.org/html/rfc6749">Oauth2 authentication</a> using a
@@ -95,14 +94,15 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
     /**
      * Adds the authorization header to the request with a valid token.
      * If we do not have a valid token yet, we send a request for one.
-     * @param $hapiClient		The client used to send the request.
-     * @param $httpRequest		The HTTP request before it is sent.
+     * @param $hapiClient	The client used to send the request.
+     * @param $request 		The request before it is sent.
+     * @return Request  The same Request with the authorization Headers.
      * @throws HttpException
      */
-    public function authorizeRequest(Http\HapiClient $hapiClient, RequestInterface &$httpRequest)
+    public function authorizeRequest(Http\HapiClient $hapiClient, Http\Request $request)
     {
-        if ($this->isRequestAuthorized($httpRequest)) {
-            return;
+        if ($this->isRequestAuthorized($request)) {
+            return $request;
         }
         
         // Request a new access token if needed
@@ -110,23 +110,33 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
             $this->getAccessToken($hapiClient);
         }
         
-        // We have a valid token (make sure to clean the Authorization header)
-        $httpRequest->removeHeader('Authorization');
-        $httpRequest->setHeader('Authorization', 'Bearer ' . $this->token->getValue());
+        // Rebuild the request with the new Authorization header
+        $headers = $request->getHeaders();
+        unset($headers['Authorization']);
+        $headers['Authorization'] = 'Bearer ' . $this->token->getValue();
+        
+        return new Http\Request(
+            $request->getUrl(),
+            $request->getMethod(),
+            $request->getUrlVariables(),
+            $request->getMessageBody(),
+            $headers
+        );
     }
     
     /**
-     * @param $httpRequest		The HTTP request before it is sent.
-     * @return boolean			false if the request needs to be authorized
+     * @param $request	The request before it is sent.
+     * @return boolean	false if the request needs to be authorized
      */
-    private function isRequestAuthorized(RequestInterface $httpRequest)
+    private function isRequestAuthorized(Http\Request $request)
     {
-        $authorization = trim($httpRequest->getHeader('Authorization'));
-        if (!$authorization) {
+        $headers = $request->getHeaders();
+        if (!isset($headers['Authorization'])) {
             return false;
-        } else {
-            return strpos($authorization, 'Basic') === 0 || strpos($authorization, 'Bearer') === 0;
         }
+        
+        $authorization = trim($headers['Authorization']);
+        return strpos($authorization, 'Basic') === 0 || strpos($authorization, 'Bearer') === 0;
     }
 
     /**
@@ -137,8 +147,8 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
     private function getAccessToken(Http\HapiClient $hapiClient)
     {
         $urlEncodedBody = new Http\UrlEncodedBody([
-            'grant_type'    => $this->grantType,
-            'scope'            => $this->scope
+            'grant_type' => $this->grantType,
+            'scope' => $this->scope
         ]);
         
         $basic = base64_encode($this->userid . ':' . $this->password);

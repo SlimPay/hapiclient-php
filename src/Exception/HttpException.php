@@ -1,16 +1,14 @@
 <?php
 namespace HapiClient\Exception;
 
-use HapiClient\Resource\Resource;
-use GuzzleHttp\Message\RequestInterface;
-use GuzzleHttp\Message\ResponseInterface;
+use HapiClient\Hal\Resource;
 
 class HttpException extends \Exception
 {
     private $request;
     private $response;
 
-    public function __construct(RequestInterface $request, ResponseInterface $response)
+    public function __construct($request, $response)
     {
         parent::__construct(
             $response->getStatusCode() . ' ' .
@@ -22,7 +20,7 @@ class HttpException extends \Exception
     }
 
     /**
-     * @return GuzzleHttp\Message\RequestInterface	The HTTP request causing the Exception.
+     * @return	The HTTP request causing the Exception.
      */
     public function getRequest()
     {
@@ -30,7 +28,7 @@ class HttpException extends \Exception
     }
 
     /**
-     * @return GuzzleHttp\Message\ResponseInterface	The HTTP response causing the Exception.
+     * @return The HTTP response causing the Exception.
      */
     public function getResponse()
     {

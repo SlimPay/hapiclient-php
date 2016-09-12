@@ -5,10 +5,10 @@ use HapiClient\Http\Auth\AuthenticationMethod;
 use HapiClient\Hal\Resource;
 use HapiClient\Hal\RegisteredRel;
 use HapiClient\Exception;
+use HapiClient\Util\Misc;
 use \GuzzleHttp\Client;
 use \GuzzleHttp\ClientInterface;
 use \GuzzleHttp\Message\RequestInterface;
-use \GuzzleHttp\Stream\Stream;
 use \GuzzleHttp\UriTemplate;
 
 final class HapiClient
@@ -38,14 +38,19 @@ final class HapiClient
             $profile = null,
             AuthenticationMethod $authenticationMethod = null)
     {
-        $this->apiUrl                = trim($apiUrl);
-        $this->entryPointUrl        = trim($entryPointUrl);
-        $this->profile                = trim($profile);
-        $this->authenticationMethod    = $authenticationMethod;
+        $this->apiUrl = trim($apiUrl);
+        $this->entryPointUrl = trim($entryPointUrl);
+        $this->profile = trim($profile);
+        $this->authenticationMethod = $authenticationMethod;
         
         if ($this->apiUrl) {
             $baseUrl = rtrim($this->apiUrl, '/') . '/';
-            $this->client = new Client(['base_url' => $baseUrl]);
+            
+            if (Misc::isGuzzle6()) {
+                $this->client = new Client(['base_uri' => $baseUrl]);
+            } else {
+                $this->client = new Client(['base_url' => $baseUrl]);
+            }
         } else {
             $this->client = new Client();
         }
@@ -109,11 +114,31 @@ final class HapiClient
      */
     public function sendRequest(Request $request)
     {
+        // Options (Guzzle 6+)
+        $options = [];
+        if (Misc::isGuzzle6()) {
+            $options['exceptions'] = false;
+            
+            if (($verify = Misc::verify($request->getUrl(), __DIR__ . '/../CA/')) !== null) {
+                $options['verify'] = $verify;
+            }
+        }
+        
         // Create the HTTP request
         $httpRequest = $this->createHttpRequest($request);
         
         // Send the request
-        $httpResponse = $this->executeHttpRequest($httpRequest);
+        $httpResponse = $this->client->send($httpRequest, $options);
+        
+        // If Unauthorized, maybe the authorization just timed out.
+        // Try it again to be sure.
+        if ($httpResponse->getStatusCode() == 401 && $this->authenticationMethod != null) {
+            // Create the HTTP request (and Authorize again)
+            $httpRequest = $this->createHttpRequest($request);
+            
+            // Execute again
+            $httpResponse = $this->client->send($httpRequest, $options);
+        }
         
         // Check the status code (must be 2xx)
         $statusCode = $httpResponse->getStatusCode();
@@ -208,6 +233,11 @@ final class HapiClient
      */
     private function createHttpRequest(Request $request)
     {
+        // Handle authentication first
+        if ($this->authenticationMethod) {
+            $request = $this->authenticationMethod->authorizeRequest($this, $request);
+        }
+        
         // The URL
         $url = ltrim(trim($request->getUrl()), '/');
         
@@ -216,108 +246,56 @@ final class HapiClient
             $url = (new UriTemplate())->expand($url, $urlVariables);
         }
         
-        // Create the request (we will handle the exceptions)
-        $httpRequest = $this->client->createRequest($request->getMethod(), $url, ['exceptions' => false]);
+        // Headers
+        $headers = [];
+        $headersToAdd = $request->getHeaders();
         
         // The message body
+        $body = null;
         if ($messageBody = $request->getMessageBody()) {
-            $httpRequest->setHeader('Content-Type', $messageBody->getContentType());
-            $httpRequest->setHeader('Content-Length', $messageBody->getContentLength());
-            $httpRequest->setBody(Stream::factory($messageBody->getContent()));
+            $headers['Content-Type'] = $messageBody->getContentType();
+            $headers['Content-Length'] = $messageBody->getContentLength();
+            $body = $messageBody->getContent();
         }
         
         // Accept hal+json response
         if ($this->profile) {
-            $accept = 'application/hal+json; profile="' . $this->profile . '"';
+            $headers['Accept'] = 'application/hal+json; profile="' . $this->profile . '"';
         } else {
-            $accept = 'application/json';
+            $headers['Accept'] = 'application/json';
         }
         
-        $httpRequest->setHeader('Accept', $accept);
-        
-        // Additional headers if specified
-        foreach ($request->getHeaders() as $key => $value) {
-            $httpRequest->setHeader($key, $value);
-        }
-        
-        // "verify" the request if needed
-        self::verify($httpRequest);
-        
-        return $httpRequest;
-    }
-    
-    /**
-     * Looks for a Certificate Authority file in the CA folder
-     * that matches the host and update the 'verify' option
-     * to its full path.
-     * If no specific file regarding a host is found, uses
-     * curl-ca-bundle.crt by default.
-     */
-    private static function verify(RequestInterface &$httpRequest)
-    {
-        $extensions = ['crt', 'pem', 'cer', 'der'];
-        $caDir = __DIR__ . '/../CA/';
-        
-        // Must be https
-        $url = $httpRequest->getUrl();
-        if (substr($url, 0, 5) != 'https') {
-            $httpRequest->getConfig()->set('verify', false);
-            return;
-        }
-        
-        // Default
-        $httpRequest->getConfig()->set('verify', $caDir . 'curl-ca-bundle.crt');
-        
-        // Look for a host specific CA file
-        $host = strtolower(parse_url($url, PHP_URL_HOST));
-        if (!$host) {
-            return;
-        }
-        
-        $filename = $host;
-        do {
-            // Look for the possible extensions
-            foreach ($extensions as $ext) {
-                if (file_exists($verify = $caDir . $filename . '.' . $ext)) {
-                    $httpRequest->getConfig()->set('verify', $verify);
-                    return;
-                }
+        // Prepare the Guzzle request
+        if (Misc::isGuzzle6()) {
+            // Guzzle 6
+            $httpRequest = new \GuzzleHttp\Psr7\Request(
+                $request->getMethod(),
+                $url,
+                array_merge($headers, $headersToAdd),
+                $body ? \GuzzleHttp\Psr7\stream_for($body) : null
+            );
+        } else {
+            // Guzzle 5.3
+            $httpRequest = $this->client->createRequest($request->getMethod(), $url, ['exceptions' => false]);
+            
+            // verify option for HTTPS requests if needed
+            if (($verify = Misc::verify($url, __DIR__ . '/../CA/')) !== null) {
+                $httpRequest->getConfig()->set('verify', $verify);
             }
             
-            // Remove a subdomain each time
-            $filename = substr($filename, strpos($filename, '.') + 1);
-        } while (substr_count($filename, '.') > 0);
-        
-        // No specific match
-        return;
-    }
-    
-    /**
-     * Sends the HTTP request.
-     * @param $httpRequest	The HTTP request to send.
-     * @return	The HTTP response.
-     * @throws HttpException	May be raised by the authentication method.
-     */
-    private function executeHttpRequest(RequestInterface $httpRequest)
-    {
-        // Authorization
-        if ($this->authenticationMethod) {
-            $this->authenticationMethod->authorizeRequest($this, $httpRequest);
-        }
-        
-        // Execution
-        $httpResponse = $this->client->send($httpRequest);
-        
-        // If Unauthorized, maybe the authorization just timed out.
-        // Try it again to be sure.
-        if ($httpResponse->getStatusCode() == 401 && $this->authenticationMethod != null) {
-            // Authorize again
-            $this->authenticationMethod->authorizeRequest($this, $httpRequest);
+            foreach ($headers as $key => $value) {
+                $httpRequest->setHeader($key, $value);
+            }
             
-            // Execute again
-            $httpResponse = $this->client->send($httpRequest);
+            foreach ($headersToAdd as $key => $value) {
+                $httpRequest->setHeader($key, $value);
+            }
+            
+            if ($body) {
+                $httpRequest->setBody(\GuzzleHttp\Stream\Stream::factory($body));
+            }
         }
         
-        return $httpResponse;
+        return $httpRequest;
     }
 }
