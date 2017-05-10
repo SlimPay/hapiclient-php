@@ -15,7 +15,6 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
     private $password;
     private $grantType;
     private $scope;
-    
     private $token;
     
     /**
@@ -34,6 +33,7 @@ final class Oauth2BasicAuthentication implements AuthenticationMethod
         $this->password = $password;
         $this->grantType = $grantType;
         $this->scope = $scope;
+        $this->token = $token;
     }
 
     /**
