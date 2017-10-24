@@ -4,7 +4,7 @@ An HTTP Client implementing the [HAL specification](https://tools.ietf.org/html/
 
 ## Requirements
 
-PHP 5.4 or higher
+PHP 5.5 or higher
 
 ## Installation
 
