@@ -2,16 +2,16 @@
 namespace HapiClient\Http;
 
 use HapiClient\Http\Auth\AuthenticationMethod;
+use HapiClient\Hal\ResourceInterface;
 use HapiClient\Hal\Resource;
 use HapiClient\Hal\RegisteredRel;
 use HapiClient\Exception;
 use HapiClient\Util\Misc;
 use \GuzzleHttp\Client;
 use \GuzzleHttp\ClientInterface;
-use \GuzzleHttp\Message\RequestInterface;
 use \GuzzleHttp\UriTemplate;
 
-final class HapiClient
+final class HapiClient implements HapiClientInterface
 {
     private $apiUrl;
     private $entryPointUrl;
@@ -57,7 +57,7 @@ final class HapiClient
     }
     
     /**
-     * @return	string	The URL pointing to the API server.
+     * {@inheritDoc}
      */
     public function getApiUrl()
     {
@@ -65,7 +65,7 @@ final class HapiClient
     }
     
     /**
-     * @return	string	The URL to the entry point Resource.
+     * {@inheritDoc}
      */
     public function getEntryPointUrl()
     {
@@ -73,7 +73,7 @@ final class HapiClient
     }
     
     /**
-     * @return	string	The URL pointing to the HAL profile.
+     * {@inheritDoc}
      */
     public function getProfile()
     {
@@ -81,7 +81,7 @@ final class HapiClient
     }
     
     /**
-     * @return	AuthenticationMethod	The authentication method
+     * {@inheritDoc}
      */
     public function getAuthenticationMethod()
     {
@@ -89,10 +89,7 @@ final class HapiClient
     }
     
     /**
-     * The HAPI Client uses a Guzzle client internally
-     * to send all the HTTP requests.
-     *
-     * @return	\GuzzleHttp\Client	The Guzzle client (passed by reference)
+     * {@inheritDoc}
      */
     public function &getClient()
     {
@@ -107,12 +104,9 @@ final class HapiClient
     }
     
     /**
-     * @param $request	Request	The Request object containing all the parameters
-     *							necessary for the HTTP request.
-     *
-     * @return Resource	The Resource object returned by the server.
+     * {@inheritDoc}
      */
-    public function sendRequest(Request $request)
+    public function sendRequest(RequestInterface $request)
     {
         // Options (Guzzle 6+)
         $options = [];
@@ -159,14 +153,9 @@ final class HapiClient
     }
     
     /**
-     * @param $follow	array|Follow	The Follow object or an array of Follow objects containing
-     *									the parameters necessary for the HTTP request(s).
-     * @param $resource	null|Resource	The resource containing the link you want to follow.
-     *									If null, the entry point Resource will be used.
-     *
-     * @return Resource	The Resource object contained in the last response.
+     * {@inheritDoc}
      */
-    public function sendFollow($follow, Resource $resource = null)
+    public function sendFollow($follow, ResourceInterface $resource = null)
     {
         if (!$resource) {
             $resource = $this->getEntryPointResource();
@@ -190,13 +179,7 @@ final class HapiClient
     }
 
     /**
-     * Sends a request to the API entry point URL ("/" by default)
-     * and returns its Resource object.
-     * 
-     * The entry point Resource is only retrieved if needed
-     * and only once per HapiClient instance.
-     * @return	Resource	The entry point Resource.
-     * @throws HttpException 
+     * {@inheritDoc}
      */
     public function getEntryPointResource()
     {
@@ -208,12 +191,7 @@ final class HapiClient
     }
     
     /**
-     * Attempts to refresh the Resource by sending a GET request
-     * to the URL referenced by the "self" relation type.
-     * If the resource doesn't have such relation type or the request fails,
-     * the same resource is returned.
-     * @param $resource	Resource	The Resource to refresh.
-     * @return	The refreshed Resource or the same Resource if failed to refresh it.
+     * {@inheritDoc}
      */
     public function refresh($resource)
     {
@@ -228,10 +206,10 @@ final class HapiClient
     /**
      * Instantiates the HttpRequest depending on the
      * configuration from the given Request.
-     * @param $request	Request	The Request configuration.
+     * @param $request	RequestInterface	The Request configuration.
      * @return	The HTTP request.
      */
-    private function createHttpRequest(Request $request)
+    private function createHttpRequest(RequestInterface $request)
     {
         // Handle authentication first
         if ($this->authenticationMethod) {

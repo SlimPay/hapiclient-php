@@ -1,7 +1,7 @@
 <?php
 namespace HapiClient\Http;
 
-final class Request extends AbstractRequest
+final class Request extends AbstractRequest implements RequestInterface
 {
     private $url;
     
