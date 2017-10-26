@@ -20,7 +20,7 @@ use HapiClient\Exception\EmbeddedResourceNotUniqueException;
  * strings [...] in a case-insensitive fashion."
  * @see https://tools.ietf.org/html/rfc5988#section-4.2
  */
-final class Resource
+final class Resource implements ResourceInterface
 {
     private $state;
     private $links;
@@ -34,9 +34,7 @@ final class Resource
     }
     
     /**
-     * All the properties of the resource
-     * ("_links" and "_embedded" not included).
-     * @return	Associative array
+     * {@inheritDoc}
      */
     public function getState()
     {
@@ -44,12 +42,7 @@ final class Resource
     }
 
     /**
-     * All the links directly available in the resource.
-     * The key is the relation type (Rel) and the value
-     * can be either a Link or a numeric array of Links.
-     * 
-     * Note that there is no guarantees as to the order of the links. 
-     * @return	Associative array
+     * {@inheritDoc}
      */
     public function getAllLinks()
     {
@@ -57,12 +50,7 @@ final class Resource
     }
 
     /**
-     * All the embedded resources directly available in the resource.
-     * The key is the relation type (Rel) and the value
-     * can be either a Resource or a numeric array of Resources.
-     * 
-     * Note that there is no guarantees as to the order of the embedded resources. 
-     * @return	Associative array
+     * {@inheritDoc}
      */
     public function getAllEmbeddedResources()
     {
@@ -70,11 +58,7 @@ final class Resource
     }
 
     /**
-     * Finds a unique link by its relation type.
-     * @param $rel	RegisteredRel|CustomRel		The relation type.
-     * @return	Link	The Link referenced by the given rel.
-     * @throws LinkNotUniqueException
-     * @throws RelNotFoundException
+     * {@inheritDoc}
      */
     public function getLink($rel)
     {
@@ -92,12 +76,7 @@ final class Resource
     }
     
     /**
-     * Finds an array of links by their relation type.
-     * Note that there is no guarantees as to the order of the links.
-     * @param $rel	RegisteredRel|CustomRel		The relation type.
-     * @return	Numeric array of links referenced by the given rel
-     * @throws LinkUniqueException
-     * @throws RelNotFoundException
+     * {@inheritDoc}
      */
     public function getLinks($rel)
     {
@@ -115,11 +94,7 @@ final class Resource
     }
     
     /**
-     * Finds a unique embedded resource by its relation type.
-     * @param $rel	RegisteredRel|CustomRel		The relation type.
-     * @return	Resource	The Resource referenced by the given rel.
-     * @throws EmbeddedResourceNotUniqueException
-     * @throws RelNotFoundException
+     * {@inheritDoc}
      */
     public function getEmbeddedResource($rel)
     {
@@ -137,12 +112,7 @@ final class Resource
     }
     
     /**
-     * Finds an array of embedded resources by their relation type.
-     * Note that there is no guarantees as to the order of the resources. 
-     * @param $rel	RegisteredRel|CustomRel		The relation type.
-     * @return	Numeric array of embedded resources referenced by the given rel.
-     * @throws EmbeddedResourceUniqueException
-     * @throws RelNotFoundException
+     * {@inheritDoc}
      */
     public function getEmbeddedResources($rel)
     {
@@ -178,9 +148,7 @@ final class Resource
     }
     
     /**
-     * Builds a Resource from its JSON representation.
-     * @param $json		string|array|object		A JSON representing the resource.
-     * @return	Resource
+     * {@inheritDoc}
      */
     public static function fromJson($json)
     {

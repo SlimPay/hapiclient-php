@@ -1,9 +1,9 @@
 <?php
 namespace HapiClient\Http;
 
-use HapiClient\Hal\Resource;
+use HapiClient\Hal\ResourceInterface;
 
-final class Follow extends AbstractRequest
+final class Follow extends AbstractRequest implements FollowInterface
 {
     private $rel;
     
@@ -21,21 +21,15 @@ final class Follow extends AbstractRequest
     }
     
     /**
-     * Looks for a unique Link referenced by the set
-     * relation type (Rel) and returns its href property.
-     * @param $resource		Resource	The Resource containing a Link referenced
-     * 									by the set relation type (Rel).
-     * @return	string	The URL in the href property of the Link.
-     * @throws LinkNotUniqueException
-     * @throws RelNotFoundException
+     * {@inheritDoc}
      */
-    public function getUrl(Resource $resource)
+    public function getUrl(ResourceInterface $resource)
     {
         return $resource->getLink($this->rel)->getHref();
     }
     
     /**
-     * @return	Rel		The relation type.
+     * {@inheritDoc}
      */
     public function getRel()
     {
