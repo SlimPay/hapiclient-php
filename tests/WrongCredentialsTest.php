@@ -7,7 +7,7 @@ use HapiClient\Exception;
 
 class WrongCredentialsTest extends \PHPUnit_Framework_TestCase
 {
-    const APIURL = 'https://api-sandbox.slimpay.net';
+    const APIURL = 'https://api.preprod.slimpay.com';
     const PROFILEURL = 'https://api.slimpay.net/alps/v1';
     const APPID = 'democreditor01';
     const APPSECRET = 'wrongsecret';
